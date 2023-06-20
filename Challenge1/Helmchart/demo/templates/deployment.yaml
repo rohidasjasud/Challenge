@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.metadata.name }}
+  namespace: {{ .Values.metadata.namespace }}
+  labels:
+    app: {{ .Values.metadata.labels.app }}    
+spec:
+  strategy: 
+    rollingUpdate: 
+      maxSurge: 100%
+      maxUnavailable: 25%
+    type: RollingUpdate  
+  selector:
+    matchLabels:
+      app: {{ .Values.spec.selector.app }}
+  replicas: {{ .Values.spec.replicas }}  
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.spec.selector.app }}  
+        type: {{ .Values.metadata.labels.type }}
+        date: "{{ now | unixEpoch }}"
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          whenUnsatisfiable: ScheduleAnyway
+          topologyKey: topology.kubernetes.io/zone
+          labelSelector:
+            matchLabels:
+              app: demo 
+      containers:
+      - image: "{{ .Values.spec.image.name }}:{{ .Values.spec.image.tag }}"
+        name: {{ .Values.spec.containers.name }}
+        imagePullPolicy: Always        
+        ports:
+        - containerPort: {{ .Values.ports.containerPort }}
+        resources:
+          requests:
+            memory: {{ .Values.spec.resources.requests.memory }}
+            cpu: {{ .Values.spec.resources.requests.cpu }}
+          limits:
+            memory: {{ .Values.spec.resources.limits.memory }}
+            cpu: {{ .Values.spec.resources.limits.cpu }}
+      nodeSelector:
+        agentpool: {{ .Values.nodeSelector }}   
+      tolerations:
+      - key: {{ .Values.tolerations.key }}
+        operator: {{ .Values.tolerations.operator }}
+        value: {{ .Values.tolerations.value }}
+        effect: {{ .Values.tolerations.effect }}        

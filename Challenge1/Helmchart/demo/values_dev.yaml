@@ -1,0 +1,34 @@
+host: demo-dev.abc.com
+certificateArn: arn:aws:acm:us-east-1:0000000:certificate/0000-00-00-00-000000
+loadbalancername: demo-dev-eks-lb
+loadbalancersg: sg-00000
+metadata:
+  name: dev-demo
+  namespace: dev
+  labels:
+    app: demo
+    type: ingress
+spec:
+  image: 
+     name: 00000000.dkr.ecr.us-east-1.amazonaws.com/demo-ecr-repository
+     tag: latest      
+  replicas: 2
+  selector:
+     app: central     
+  containers:
+     name: demo
+  resources:
+     limits:
+       memory: "1Gi"
+       cpu: "1000m"   
+     requests:
+       memory: "1Gi"
+       cpu: "1000m"   
+ports:
+  containerPort: 8000     
+nodeSelector: central   
+tolerations:
+  key: pool-name
+  operator: Equal
+  value: central
+  effect: NoSchedule       
